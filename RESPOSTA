@@ -1,0 +1,51 @@
+R
+R
+Rusing System;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        Console.Write("Digite o nome do Pokémon: ");
+        string nome = Console.ReadLine().ToLower();
+
+        await ConsumirPokemon(nome);
+    }
+
+    static async Task ConsumirPokemon(string nome)
+    {
+        string url = $"https://pokeapi.co/api/v2/pokemon/{nome}";
+
+        using (HttpClient client = new HttpClient())
+        {
+            var response = await client.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Pokémon não encontrado.");
+                return;
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                var root = doc.RootElement;
+
+                int id = root.GetProperty("id").GetInt32();
+                string name = root.GetProperty("name").GetString();
+                int height = root.GetProperty("height").GetInt32();
+                int weight = root.GetProperty("weight").GetInt32();
+
+                Console.WriteLine("\nDados do Pokémon:");
+                Console.WriteLine($"Id: {id}");
+                Console.WriteLine($"Nome: {name}");
+                Console.WriteLine($"Altura: {height}");
+                Console.WriteLine($"Peso: {weight}");
+            }
+        }
+    }
+}
